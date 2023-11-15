@@ -191,7 +191,6 @@ export default {
 
     selectTestScheme() {
       document.getElementById('select-test-scheme-button').blur()
-      // this.switchHandle()
       ipcRenderer.removeAllListeners('select-test-scheme-response')
       ipcRenderer.send('select-test-scheme-request')
       ipcRenderer.on('select-test-scheme-response', (event, response) => {
@@ -203,7 +202,7 @@ export default {
             this.featureList = fileContentObject.featureList
             this.barcodeList = fileContentObject.barcodeList
             this.processList = fileContentObject.processList
-            this.statusReset()
+            this.statusClear()
             if (this.featureList.includes('print')) {
               this.enablePrinter = true
             } else {
@@ -215,6 +214,11 @@ export default {
             } else {
               this.enableScanner = false
               this.serialCardShow = true
+              if (this.serialPort && this.serialPort.isOpen) {
+                this.selectButtonDisabled = true
+                this.switchDisabled = false
+                this.testButtonDisabled = false
+              }
             }
             break
           case 'error':
@@ -245,7 +249,7 @@ export default {
           this.compareResultList = []
           this.scanDrawer = !this.scanDrawer
           this.serialCardShow = true
-          if (this.passFlag !== 0) {
+          if (this.serialPort && this.serialPort.isOpen) {
             this.selectButtonDisabled = true
             this.switchDisabled = false
             this.testButtonDisabled = false
@@ -326,18 +330,19 @@ export default {
       document.getElementById('exit-verification-button').blur()
       this.resetVerification()
       this.scanDrawer = !this.scanDrawer
-      this.enterVerificationButtonShow = !this.enterVerificationButtonShow
+      this.enterVerificationButtonShow = true
       if (this.passFlag !== 0) {
         this.selectButtonDisabled = false
         this.switchDisabled = true
         this.testButtonDisabled = true
       }
+      // this.selectButtonDisabled = false
     },
 
     enterVerification() {
       document.getElementById('enter-verification-button').blur()
       this.scanDrawer = !this.scanDrawer
-      this.enterVerificationButtonShow = !this.enterVerificationButtonShow
+      this.enterVerificationButtonShow = false
     },
 
     async openTest() {
@@ -417,13 +422,12 @@ export default {
       })
     },
 
-    statusReset() {
-      this.passFlag = 0
+    statusClear() {
       this.testResult = []
       this.testResultCardShow = false
-      this.serialCardShow = false
       this.enterVerificationButtonShow = false
-      this.selectButtonDisabled = false
+      this.serialCardShow = false
+      this.passFlag = 0
     }
   },
 
