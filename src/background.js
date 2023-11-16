@@ -145,12 +145,13 @@ ipcMain.on('save-excel-and-local', (event, data) => {
   const testResult = data.testResult
   const resultMessage = data.resultMessage
   const testScheme = data.testScheme
+  const printBarcode = data.printBarcode
   const { date, time } = getCurrentDateAndTime()
   const { exists, filePath } = checkIfFileExists(testScheme)
   let response = {}
   if (exists) {
     try {
-      updateExcelFile(filePath, date, time, resultMessage, testResult)
+      updateExcelFile(filePath, date, time, resultMessage, testResult, printBarcode)
       response.status = 'success'
       response.message = '测试数据Excel文件更新成功'
     } catch (error) {
@@ -159,7 +160,7 @@ ipcMain.on('save-excel-and-local', (event, data) => {
     }
   } else {
     try {
-      createExcelFile(filePath, date, time, resultMessage, testResult)
+      createExcelFile(filePath, date, time, resultMessage, testResult, printBarcode)
       response.status = 'success'
       response.message = '测试数据Excel文件新建并保存成功'
     } catch (error) {
@@ -192,11 +193,11 @@ function getCurrentDateAndTime() {
     return { date: dateFormatted, time: timeFormatted }
 }
 
-function createExcelFile(filePath, date, time, resultMessage, testResult) {
+function createExcelFile(filePath, date, time, resultMessage, testResult, printBarcode) {
   try {
-    const headers = ['测试日期', '测试时间', '测试结果', '测试数据']
+    const headers = ['测试日期', '测试时间', '测试结果', '条码数据', '测试数据']
     const excelData = [headers, [
-      date, time, resultMessage, JSON.stringify(testResult)
+      date, time, resultMessage, printBarcode, JSON.stringify(testResult)
     ]]
     const ws = XLSX.utils.aoa_to_sheet(excelData)
     const wb = XLSX.utils.book_new()
@@ -208,12 +209,12 @@ function createExcelFile(filePath, date, time, resultMessage, testResult) {
   }
 }
 
-function updateExcelFile(filePath, date, time, resultMessage, testResult) {
+function updateExcelFile(filePath, date, time, resultMessage, testResult, printBarcode) {
   try {
     const file = fs.readFileSync(filePath)
     const wb = XLSX.read(file, { type: 'buffer' })
     const ws = wb.Sheets['Sheet1']
-    const excelData = [date, time, resultMessage, JSON.stringify(testResult)]
+    const excelData = [date, time, resultMessage, printBarcode, JSON.stringify(testResult)]
     const range = XLSX.utils.decode_range(ws['!ref'])
     const newRow = range.e.r + 1
     excelData.forEach((value, index) => {

@@ -150,7 +150,7 @@
 const { ipcRenderer } = require('electron')
 const { SerialPort } = require('serialport')
 const { ReadlineParser } = require('@serialport/parser-readline')
-import { showMessage, showMessageBox, isWithinRange, isNumericOrFloat } from '@/utils.js'
+import { showMessage, showMessageBox, isWithinRange, isNumericOrFloat, generatePrintBarcode } from '@/utils.js'
 import { channelArray } from '@/channelOptions'
 export default {
   data() {
@@ -380,10 +380,10 @@ export default {
         'fail1': { resultMessage: '测试未通过，测试值异常', resultType: 'error' },
         'fail2': { resultMessage: '测试未通过，测试值对比不通过', resultType: 'error' }
       }
-      const result = stateMappings[endState]
-      const { resultMessage, resultType } = result
+      const { resultMessage, resultType } = stateMappings[endState]
+      const printBarcode = generatePrintBarcode(this.testScheme, resultType)
       showMessageBox(resultMessage, this.showMessageBoxTitle, resultType, () => {
-        this.saveExcelAndLocal(this.testResult, resultMessage, this.testScheme, () => {
+        this.saveExcelAndLocal(this.testResult, resultMessage, this.testScheme, printBarcode, () => {
           if (this.enablePrinter) {
             console.log('进入打印流程...')
           }
@@ -405,12 +405,13 @@ export default {
       })
     },
 
-    saveExcelAndLocal(testResult, resultMessage, testScheme, callback) {
+    saveExcelAndLocal(testResult, resultMessage, testScheme, printBarcode, callback) {
       ipcRenderer.removeAllListeners('save-excel-and-local-response')
       const dataToPass = {
         testResult: testResult,
         resultMessage: resultMessage,
-        testScheme: testScheme
+        testScheme: testScheme,
+        printBarcode: printBarcode
       }
       ipcRenderer.send('save-excel-and-local', dataToPass)
       ipcRenderer.on('save-excel-and-local-response', (event, data) => {

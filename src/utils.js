@@ -33,4 +33,23 @@ function isNumericOrFloat(str) {
   return numericFloatPattern.test(str);
 }
 
-export { showMessage, showMessageBox, isWithinRange, isNumericOrFloat }
+function generatePrintBarcode(testScheme, resultType) {
+  const time = getFormattedDate();
+  return resultType === 'error'
+    ? `Fail${testScheme}${time}`
+    : `${testScheme}${time}`;
+}
+
+function getFormattedDate() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}${month}${day}`;
+}
+
+function formatNumber(num) {
+  return num < 10 ? `0${num}` : num;
+}
+
+export { showMessage, showMessageBox, isWithinRange, isNumericOrFloat, generatePrintBarcode }

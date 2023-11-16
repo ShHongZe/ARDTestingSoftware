@@ -59,36 +59,35 @@ export const channelOptions = [
     value: 'voltage6_channel',
     label: '可采 AC220V 电压通道',
     children: [
-      {value: '41', label: '1'}, {value: '42', label: '2'},
-      {value: '43', label: '3'}, {value: '44', label: '4'},
+      {value: '41', label: '1'}, {value: '42', label: '2'}
     ]
   },
   {
     value: 'voltage7_channel',
     label: '可采 AC380V 电压通道',
     children: [
-      {value: '45', label: '1'}, {value: '46', label: '2'}
+      {value: '43', label: '1'}, {value: '44', label: '2'}
     ]
   },
   {
-    value: '47',
+    value: '45',
     label: '可采 0-5A 电流通道'
   },
   {
-    value: '48',
+    value: '46',
     label: '可采 0-20A 电流通道'
   },
   {
-    value: '49',
+    value: '47',
     label: '可采 0-30A 电流通道'
   },
   {
-    value: '50',
+    value: '48',
     label: '可采 0-100A 电流通道'
   },
   {
-    value: '51',
-    label: '待定通道'
+    value: '49',
+    label: 'ARD内部数据'
   }
 ]
 
