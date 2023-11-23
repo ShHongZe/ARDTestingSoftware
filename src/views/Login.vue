@@ -9,6 +9,7 @@
       <div class="login-prompt">
         <span>工程师 - engineer</span>
         <span>测试员 - tester</span>
+        <span>打印服务 POSTEK Browser Print Server</span>
       </div>
 
       <div class="login-input">

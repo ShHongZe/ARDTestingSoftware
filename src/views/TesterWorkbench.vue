@@ -83,7 +83,7 @@
                 <template slot-scope="scope">
                   <el-tag
                     v-if="scope.row.valueComparison"
-                    :type="scope.row.valueComparison === '对比通过' ? 'success' : 'danger'"
+                    :type="getTypeForValueComparison(scope.row.valueComparison)"
                     effect="dark">
                     {{ scope.row.valueComparison }}
                   </el-tag>
@@ -152,6 +152,7 @@ const { SerialPort } = require('serialport')
 const { ReadlineParser } = require('@serialport/parser-readline')
 import { showMessage, showMessageBox, isWithinRange, isNumericOrFloat, generatePrintBarcode } from '@/utils.js'
 import { channelArray } from '@/channelOptions'
+import { print } from '@/print/print'
 export default {
   data() {
     return {
@@ -362,17 +363,21 @@ export default {
         this.serialPort.write(item.channel + '\r\n')
         const testValue = await this.handleSerialPortReception()
         this.testResult[i].testValue = testValue
-        if (!isNumericOrFloat(testValue)) {
-          this.testResult[i].valueComparison = '测试值异常'
-          endState = 'fail1'
-          break
+        if (item.channel !== '49') {
+          if (!isNumericOrFloat(testValue)) {
+            this.testResult[i].valueComparison = '测试值异常'
+            endState = 'fail1'
+            break
+          }
+          if (!isWithinRange(testValue, item.standardValue)) {
+            this.testResult[i].valueComparison = '测试值对比不通过'
+            endState = 'fail2'
+            break
+          }
+          this.testResult[i].valueComparison = '对比通过'
+        } else {
+          this.testResult[i].valueComparison = '获取成功'
         }
-        if (!isWithinRange(testValue, item.standardValue)) {
-          this.testResult[i].valueComparison = '测试值对比不通过'
-          endState = 'fail2'
-          break
-        }
-        this.testResult[i].valueComparison = '对比通过'
         await new Promise(resolve => setTimeout(resolve, item.delay * 1000))
       }
       const stateMappings = {
@@ -384,14 +389,18 @@ export default {
       const printBarcode = generatePrintBarcode(this.testScheme, resultType)
       showMessageBox(resultMessage, this.showMessageBoxTitle, resultType, () => {
         this.saveExcelAndLocal(this.testResult, resultMessage, this.testScheme, printBarcode, () => {
+          const printCallback = () => {
+            if (this.enableScanner) {
+              this.scanDrawer = !this.scanDrawer
+            }
+            this.switchDisabled = false
+            this.testButtonDisabled = false
+          }
           if (this.enablePrinter) {
-            console.log('进入打印流程...')
+            print(printBarcode, printCallback)
+          } else {
+            printCallback()
           }
-          if (this.enableScanner) {
-            this.scanDrawer = !this.scanDrawer
-          }
-          this.switchDisabled = false
-          this.testButtonDisabled = false
         })
       })
     },
@@ -429,10 +438,21 @@ export default {
       this.enterVerificationButtonShow = false
       this.serialCardShow = false
       this.passFlag = 0
+    },
+
+    getTypeForValueComparison(valueComparison) {
+      switch (valueComparison) {
+        case '对比通过':
+          return 'success'
+        case '获取成功':
+          return 'info'
+        default:
+          return 'danger'
+      }
     }
   },
 
-  destroyed() {
+  beforeDestroy() {
     this.closeSerialPort()
   }
 }

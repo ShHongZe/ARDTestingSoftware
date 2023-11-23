@@ -38,10 +38,10 @@
           </div>
           <div>
             <div v-for="(item, index) in processList" :key="index" class="test-step-container">
-              <el-cascader class="step-item" v-model="item.channel" 
-                placeholder="请选择通道" :options="options" :props="props"></el-cascader>
-              <el-input class="step-item" v-model="item.standardValue" placeholder="请输入标准值">
-              </el-input>
+              <el-cascader class="step-item" v-model="item.channel" placeholder="请选择通道" 
+                :options="options" :props="props" @change="handleChannelChange(index)"></el-cascader>
+              <el-input class="step-item" v-model="item.standardValue" placeholder="请输入标准值" 
+                :disabled="item.disabled"></el-input>
               <el-input class="step-item" v-model="item.delay" placeholder="请输入延时">
               </el-input>
               <el-button class="step-item-button" type="danger" plain 
@@ -94,7 +94,8 @@ export default {
 
     addTestStep() {
       document.getElementById("add-test-step-button").blur()
-      const defaultStep = { channel: '', standardValue: '', delay: '0' }
+      // const defaultStep = { channel: '', standardValue: '', delay: '0' }
+      const defaultStep = { channel: '', standardValue: '', delay: '0', disabled: false }
       if (this.processList.length === 0 || !this.hasEmptyProperty()) {
         this.processList.push({ ...defaultStep })
       } else {
@@ -184,6 +185,16 @@ export default {
         return false
       }
       return true
+    },
+
+    handleChannelChange(index) {
+      if (this.processList[index].channel.includes('49') && this.processList[index].channel.length === 1) {
+        this.processList[index].disabled = true
+        this.processList[index].standardValue = '获取展示'
+      } else {
+        this.processList[index].disabled = false
+        this.processList[index].standardValue = ''
+      }
     }
   },
 

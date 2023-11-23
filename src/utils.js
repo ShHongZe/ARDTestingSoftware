@@ -5,6 +5,7 @@ function showMessage(message, type, callback = () => {}) {
   Message({
     message: message,
     type: type,
+    duration: 1000,
     onClose: callback
   })
 }
