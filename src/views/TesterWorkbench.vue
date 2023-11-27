@@ -204,6 +204,7 @@ export default {
             this.barcodeList = fileContentObject.barcodeList
             this.processList = fileContentObject.processList
             this.statusClear()
+            ipcRenderer.send('open-image-request', this.testScheme)
             if (this.featureList.includes('print')) {
               this.enablePrinter = true
             } else {
@@ -376,14 +377,21 @@ export default {
           }
           this.testResult[i].valueComparison = '对比通过'
         } else {
-          this.testResult[i].valueComparison = '获取成功'
+          if (testValue === 'Error') {
+            this.testResult[i].valueComparison = '获取失败'
+            endState = 'fail3'
+            break
+          } else {
+            this.testResult[i].valueComparison = '获取成功'
+          }
         }
         await new Promise(resolve => setTimeout(resolve, item.delay * 1000))
       }
       const stateMappings = {
         'pass': { resultMessage: '测试通过', resultType: 'success' },
         'fail1': { resultMessage: '测试未通过，测试值异常', resultType: 'error' },
-        'fail2': { resultMessage: '测试未通过，测试值对比不通过', resultType: 'error' }
+        'fail2': { resultMessage: '测试未通过，测试值对比不通过', resultType: 'error' },
+        'fail3': { resultMessage: '测试未通过，ARD内部数据获取失败', resultType: 'error' }
       }
       const { resultMessage, resultType } = stateMappings[endState]
       const printBarcode = generatePrintBarcode(this.testScheme, resultType)

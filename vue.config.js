@@ -14,6 +14,7 @@ module.exports = defineConfig({
     ],
     electronBuilder: {
       nodeIntegration: true,
+      customFileProtocol: "./",
       externals: ['serialport']
     }
   }

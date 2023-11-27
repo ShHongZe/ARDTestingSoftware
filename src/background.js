@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 
@@ -293,3 +293,11 @@ function processProcessList(processList) {
     }
   })
 }
+
+// -------------------------------------------------------------------------------------------
+
+ipcMain.on('open-image-request', (event, data) => {
+  const imageFile = data + '.jpg'
+  const imagePath = path.join(require('os').homedir(), 'Desktop', '方案接线图', imageFile)
+  shell.openPath(imagePath)
+})
